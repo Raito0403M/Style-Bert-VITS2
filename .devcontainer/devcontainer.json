@@ -1,27 +1,43 @@
 {
-    "name": "Style-Bert-VITS2",
-    "build": {
-      "dockerfile": "Dockerfile",
-      "context": ".."
-    },
-    "runArgs": [
-      "--gpus=all"
-    ],
-    "forwardPorts": [7860, 8888],
-    "postCreateCommand": "cd /workspaces/Style-Bert-VITS2 && python -m pip install -r requirements.txt && python initialize.py",
-    "customizations": {
-      "vscode": {
-        "extensions": [
-          "ms-python.python",
-          "ms-toolsai.jupyter",
-          "ms-python.vscode-pylance"
-        ],
-        "settings": {
-          "python.defaultInterpreterPath": "/usr/bin/python3",
-          "python.linting.enabled": true,
-          "editor.formatOnSave": true,
-          "python.formatting.provider": "black"
-        }
+  "name": "Style-Bert-VITS2",
+  "build": {
+    "dockerfile": "../Dockerfile.dev",
+    "context": ".."
+  },
+  "runArgs": [
+    "--gpus=all",
+    "--device=/dev/snd:/dev/snd",
+    "--group-add=29",
+    "--publish=192.168.1.24:8080:8080"
+  ],
+  "mounts": [
+    "source=/dev/snd,target=/dev/snd,type=bind",
+    "source=/run/user/1000/pulse,target=/run/user/1000/pulse,type=bind",
+    "source=${localEnv:HOME}/.config/pulse/cookie,target=/root/.config/pulse/cookie,type=bind"
+  ],
+  "containerEnv": {
+    "PULSE_SERVER": "unix:/run/user/1000/pulse/native"
+  },
+  "forwardPorts": [
+    7860,
+    8888,
+    8000,
+    8080
+  ],
+  "postCreateCommand": "cd /workspaces/Style-Bert-VITS2 && python -m pip install -e .",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "ms-python.vscode-pylance"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/bin/python3",
+        "python.linting.enabled": true,
+        "editor.formatOnSave": true,
+        "python.formatting.provider": "black"
       }
     }
   }
+}

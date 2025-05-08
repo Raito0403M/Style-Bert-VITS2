@@ -45,6 +45,6 @@ def separate_vocals_with_demucs(audio_path: Union[str, Path], output_path: Union
     return str(output_path) if output_path else None
 
 if __name__ == "__main__":
-    input_file = "Data/row_data/toy_3_128K_aac merged.wav"
-    output_file = "Data/row_data/buzz_lightyear_vocals_3.wav"
+    input_file = "Data/row_data_noized/toy_4_128K_aac merged.wav"
+    output_file = "inputs/buzz_lightyear_vocals_4.wav"
     separate_vocals_with_demucs(input_file, output_file)
