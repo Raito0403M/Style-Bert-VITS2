@@ -109,8 +109,8 @@ def initialize_worker(port: int = WORKER_PORT) -> None:
             # start_new_session is same as specifying setsid in preexec_fn
             subprocess.Popen(
                 args,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                # stdout=subprocess.DEVNULL,
+                # stderr=subprocess.DEVNULL,
                 start_new_session=True,
             )
 

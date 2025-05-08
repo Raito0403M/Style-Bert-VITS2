@@ -1,3 +1,6 @@
+# Development environment for Style-Bert-VITS2 with GPU support
+# Based on the original Dockerfile.train with optimizations for local development
+
 # Ubuntu 22.04 as base image
 FROM ubuntu:22.04
 
@@ -26,6 +29,10 @@ RUN apt-get update && \
     ffmpeg \
     software-properties-common \
     gnupg \
+    portaudio19-dev \
+    pulseaudio \
+    pulseaudio-utils \
+    alsa-utils \
     python3 \
     python3-pip \
     python3-dev
@@ -60,7 +67,7 @@ RUN $PIP_INSTALL torch torchvision torchaudio --index-url https://download.pytor
 # Install Jupyter for development
 RUN $PIP_INSTALL jupyterlab
 
-# Copy requirements.txt and install dependencies
+# Install project dependencies
 COPY requirements.txt /tmp/requirements.txt
 RUN $PIP_INSTALL -r /tmp/requirements.txt
 RUN rm /tmp/requirements.txt
@@ -69,7 +76,7 @@ RUN rm /tmp/requirements.txt
 WORKDIR /workspace
 
 # Expose ports for Jupyter and Web UI
-EXPOSE 7860 8888
+EXPOSE 7860 8888 8000 8080
 
 # Default command
-CMD ["bash"]
+CMD ["bash"] 
