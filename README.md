@@ -244,3 +244,9 @@ For quick guide, please refer to `webui_preprocess.py`.
 </a>
 
 [//]: # (# 本项目所有代码引用均已写明，bert部分代码思路来源于[AI峰哥]&#40;https://www.bilibili.com/video/BV1w24y1c7z9&#41;，与[vits_chinese]&#40;https://github.com/PlayVoice/vits_chinese&#41;无任何关系。欢迎各位查阅代码。同时，我们也对该开发者的[碰瓷，乃至开盒开发者的行为]&#40;https://www.bilibili.com/read/cv27101514/&#41;表示强烈谴责。)
+
+
+curl -X POST http://localhost:8000/optimization/optimize-flow \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer airion" \
+  -d '{"times": 2, "black_shift_num": 5}'
