@@ -6,24 +6,27 @@
   },
   "runArgs": [
     "--gpus=all",
-    "--device=/dev/snd:/dev/snd",
-    "--group-add=29",
-    "--publish=192.168.1.24:8080:8080"
+    // "--device=/dev/snd:/dev/snd",
+    // "--group-add=29",
+    "--publish=8080:8080"
   ],
   "mounts": [
-    "source=/dev/snd,target=/dev/snd,type=bind",
-    "source=/run/user/1000/pulse,target=/run/user/1000/pulse,type=bind",
-    "source=${localEnv:HOME}/.config/pulse/cookie,target=/root/.config/pulse/cookie,type=bind"
+    // "source=/dev/snd,target=/dev/snd,type=bind",
+    // "source=/run/user/1000/pulse,target=/run/user/1000/pulse,type=bind",
+    // "source=${localEnv:HOME}/.config/pulse/cookie,target=/root/.config/pulse/cookie,type=bind"
   ],
-  "containerEnv": {
-    "PULSE_SERVER": "unix:/run/user/1000/pulse/native"
-  },
+  // "containerEnv": {
+  //   "PULSE_SERVER": "unix:/run/user/1000/pulse/native"
+  // },
   "forwardPorts": [
     7860,
     8888,
     8000,
     8080
   ],
+  "features": {
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
+  },
   "postCreateCommand": "cd /workspaces/Style-Bert-VITS2 && python -m pip install -e .",
   "customizations": {
     "vscode": {
