@@ -1,0 +1,85 @@
+# Style-Bert-VITS2 with Buzz Robot (cuDNN Fixed)
+FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+
+# 環境変数の設定
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Tokyo
+ENV PYTHONUNBUFFERED=1
+ENV CUDA_MODULE_LOADING=LAZY
+
+# 基本パッケージのインストール
+RUN apt-get update && apt-get install -y \
+    python3.10 \
+    python3.10-dev \
+    python3-pip \
+    git \
+    wget \
+    curl \
+    ffmpeg \
+    libsndfile1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python3.10をデフォルトに
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
+
+# pipのアップグレード
+RUN python3 -m pip install --upgrade pip
+
+# 作業ディレクトリの設定
+WORKDIR /app
+
+# requirements.txtをコピーして依存関係をインストール
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# PyTorchとcuDNN関連のインストール（CUDA 11.8用）
+RUN pip install torch==2.3.0+cu118 torchaudio==2.3.0+cu118 --index-url https://download.pytorch.org/whl/cu118
+
+# faster-whisperのインストール
+RUN pip install faster-whisper
+
+# NVIDIAリポジトリの追加とCUDA 11.8用cuDNN 9のインストール
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb && \
+    dpkg -i cuda-keyring_1.1-1_all.deb && \
+    apt-get update && \
+    apt-get install -y libcudnn9-cuda-11 && \
+    rm -rf /var/lib/apt/lists/*
+
+# プロジェクトファイルをコピー
+COPY . .
+
+# cuDNNシンボリックリンクの作成スクリプト
+RUN echo '#!/bin/bash\n\
+CUDNN_DIR="/usr/local/lib/python3.10/dist-packages/nvidia/cudnn/lib"\n\
+if [ -d "$CUDNN_DIR" ]; then\n\
+    cd $CUDNN_DIR\n\
+    if [ -f "libcudnn_ops.so.9" ]; then\n\
+        ln -sf libcudnn_ops.so.9 libcudnn_ops.so.9.1.0\n\
+        ln -sf libcudnn_ops.so.9 libcudnn_ops.so.9.1\n\
+    fi\n\
+fi' > /app/setup_cudnn_links.sh && chmod +x /app/setup_cudnn_links.sh
+
+# 起動スクリプトの作成
+RUN echo '#!/bin/bash\n\
+# cuDNNパスの設定\n\
+export LD_LIBRARY_PATH=/usr/local/lib/python3.10/dist-packages/nvidia/cudnn/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH\n\
+\n\
+# シンボリックリンクの作成\n\
+/app/setup_cudnn_links.sh\n\
+\n\
+# サーバーの起動\n\
+if [ $# -eq 0 ]; then\n\
+    python buzz_robot_with_memory.py\n\
+else\n\
+    python $1\n\
+fi' > /app/start_server.sh && chmod +x /app/start_server.sh
+
+# ポートの公開
+EXPOSE 7860 8888 8000 8080
+
+# LD_LIBRARY_PATHを環境変数として設定
+ENV LD_LIBRARY_PATH=/usr/local/lib/python3.10/dist-packages/nvidia/cudnn/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+
+# エントリーポイント
+ENTRYPOINT ["/app/start_server.sh"]
